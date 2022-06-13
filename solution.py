@@ -1,8 +1,13 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import tensorflow as tf
 import os
 import pathlib
+from tensorflow.keras.preprocessing import image
+from tensorflow.keras.preprocessing.image import ImageDataGenerator, img_to_array, array_to_img, load_img
+from sklearn.model_selection import train_test_split
+from tensorflow.keras.utils import to_categorical
+from tensorflow.keras.layers import Conv2D, MaxPool2D, Dense, Flatten, Dropout
+from tensorflow.keras.models import Sequential
 
 dataset_path = os.path.dirname(__file__) + "/Dataset"
 train_path = dataset_path + "/Train"
@@ -21,6 +26,22 @@ for i in range(CATEGORIES_COUNT):
     plt.xticks([])
     plt.yticks([])
     traffic_sign = list(img_dir.glob(f'{i}/*'))[0]
-    image = tf.keras.preprocessing.image.load_img(traffic_sign, target_size=(IMG_WIDTH, IMG_HEIGHT))
+    image = load_img(traffic_sign, target_size=(IMG_WIDTH, IMG_HEIGHT))
     plt.imshow(image)
 plt.show()
+
+def load_images(path):
+    images_list = list()
+    label_list = list()
+    for category in range(CATEGORIES_COUNT):
+        categories_path = os.path.join(path, str(category))
+        for img in os.listdir(categories_path):
+            img = load_img(os.path.join(categories_path, img), target_size=(30, 30))
+            image = img_to_array(img)
+            images_list.append(image)
+            label_list.append(category)
+    return images_list,label_list
+
+images_loaded, labels_loaded = load_images(train_path)
+labels_loaded = to_categorical(labels_loaded)
+x_train, x_test, y_train, y_test = train_test_split(np.array(images_loaded), labels_loaded, test_size=0.4)
