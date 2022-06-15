@@ -9,10 +9,16 @@ from sklearn.model_selection import train_test_split
 from keras.utils import to_categorical
 from keras.layers import Conv2D, MaxPool2D, Dense, Flatten, Dropout
 from keras.models import Sequential
+from sklearn.metrics import accuracy_score
+import pandas as pd
+
+
+
+
 
 dataset_path = os.path.dirname(__file__) + "/Dataset"
 train_path = dataset_path + "/Train"
-test_path = dataset_path + "/Test"
+test_path = dataset_path + "/"
 IMG_HEIGHT = 32
 IMG_WIDTH = 32
 CATEGORIES_COUNT = len(os.listdir(train_path))
@@ -50,30 +56,30 @@ x_train, x_test, y_train, y_test = train_test_split(np.array(images_loaded), lab
 
 
 
-convModel = Sequential()
+conv_model = Sequential()
 
 
-convModel.add(Conv2D(filters=32, kernel_size=3, activation='relu', input_shape=(IMG_HEIGHT,IMG_WIDTH,3)))
-convModel.add(MaxPool2D(pool_size=(2, 2)))
-convModel.add(Dropout(rate=0.25))
+conv_model.add(Conv2D(filters=32, kernel_size=3, activation='relu', input_shape=(IMG_HEIGHT,IMG_WIDTH,3)))
+conv_model.add(MaxPool2D(pool_size=(2, 2)))
+conv_model.add(Dropout(rate=0.25))
 
 
-convModel.add(Conv2D(filters=64, kernel_size=3, activation='relu'))
-convModel.add(MaxPool2D(pool_size=(2, 2)))
-convModel.add(Dropout(rate=0.25))
+conv_model.add(Conv2D(filters=64, kernel_size=3, activation='relu'))
+conv_model.add(MaxPool2D(pool_size=(2, 2)))
+conv_model.add(Dropout(rate=0.25))
 
-convModel.add(Conv2D(filters=64, kernel_size=3, activation='relu'))
+conv_model.add(Conv2D(filters=64, kernel_size=3, activation='relu'))
 
-convModel.summary()
+conv_model.summary()
 
-convModel.add(Flatten())
-convModel.add(Dense(units=64, activation='relu'))
-convModel.add(Dense(CATEGORIES_COUNT, activation='softmax'))
+conv_model.add(Flatten())
+conv_model.add(Dense(units=64, activation='relu'))
+conv_model.add(Dense(CATEGORIES_COUNT, activation='softmax'))
 
-convModel.summary()
+conv_model.summary()
 
 print("Kreiran model")
-convModel.compile(
+conv_model.compile(
     loss='categorical_crossentropy',
     optimizer='adam',
     metrics=['accuracy']
@@ -81,7 +87,7 @@ convModel.compile(
 
 print("Kompajliran model")
 EPOCHS = 30
-fitted_model = convModel.fit(x_train, 
+fitted_model = conv_model.fit(x_train, 
                     y_train,
                     validation_data = (x_test, y_test), 
                     epochs=EPOCHS, 
@@ -90,3 +96,23 @@ fitted_model = convModel.fit(x_train,
 
 print("Zavrsio model")
 
+
+model_loss, model_accuracy = conv_model.evaluate(x_test, y_test)
+
+print('Preciznost na dataset-u za testiranje: ', model_accuracy * 100)
+
+
+Y_test = pd.read_csv(test_path + 'Test.csv')
+test_labels = Y_test["ClassId"].values
+test_images = Y_test["Path"].values
+
+output_images = list()
+for img in test_images:
+    image = load_img(os.path.join(test_path, img), target_size=(32, 32))
+    output_images.append(np.array(image))
+
+X_test=np.array(output_images)
+predictions = np.array(np.argmax(conv_model.predict(X_test), axis=-1))
+
+
+print('Preciznost predvidjenih vrednosti: ',accuracy_score(test_labels, predictions)*100)
