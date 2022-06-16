@@ -9,6 +9,7 @@ from sklearn.model_selection import train_test_split
 from keras.utils import to_categorical
 from keras.layers import Conv2D, MaxPool2D, Dense, Flatten, Dropout
 from keras.models import Sequential
+from keras.callbacks import History
 from sklearn.metrics import accuracy_score
 import pandas as pd
 
@@ -101,6 +102,29 @@ model_loss, model_accuracy = conv_model.evaluate(x_test, y_test)
 
 print('Preciznost na dataset-u za testiranje: ', model_accuracy * 100)
 
+accuracy = fitted_model.history['accuracy']
+val_accuracy = fitted_model.history['val_accuracy']
+
+loss=fitted_model.history['loss']
+val_loss=fitted_model.history['val_loss']
+
+epochs_range = range(EPOCHS)
+
+plt.figure(figsize=(8, 8))
+plt.subplot(1, 2, 1)
+plt.plot(epochs_range, accuracy, label='Preciznost pri treniranju')
+plt.plot(epochs_range, val_accuracy, label='Preciznost pri validaciji')
+plt.legend(loc='lower right')
+plt.title('Preciznost pri treniranju i validaciji')
+
+plt.subplot(1, 2, 2)
+plt.plot(epochs_range, loss, label='Gubici pri treniranju')
+plt.plot(epochs_range, val_loss, label='Gubici pri validaciji')
+plt.legend(loc='upper right')
+plt.title('Gubici pri treniranju i validaciji')
+plt.show()
+
+
 
 Y_test = pd.read_csv(test_path + 'Test.csv')
 test_labels = Y_test["ClassId"].values
@@ -116,3 +140,21 @@ predictions = np.array(np.argmax(conv_model.predict(X_test), axis=-1))
 
 
 print('Preciznost predvidjenih vrednosti: ',accuracy_score(test_labels, predictions)*100)
+
+plt.figure(figsize = (13, 13))
+
+start_index = 0
+for i in range(25):
+    plt.subplot(5, 5, i + 1)
+    plt.grid(False)
+    plt.xticks([])
+    plt.yticks([])
+    prediction = predictions[start_index + i]
+    actual = test_labels[start_index + i]
+    col = 'g'
+    if prediction != actual:
+        col = 'r'
+    plt.xlabel('Stvarna vr.={} || Predvidjena vr={}'.format(actual, prediction), color = col)
+    plt.imshow(X_test[start_index + i])
+    
+plt.show()
