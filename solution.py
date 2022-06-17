@@ -80,6 +80,7 @@ conv_model.add(Dense(CATEGORIES_COUNT, activation='softmax'))
 conv_model.summary()
 
 print("Kreiran model")
+
 conv_model.compile(
     loss='categorical_crossentropy',
     optimizer='adam',
@@ -87,6 +88,7 @@ conv_model.compile(
 )
 
 print("Kompajliran model")
+
 EPOCHS = 30
 fitted_model = conv_model.fit(x_train, 
                     y_train,
@@ -143,18 +145,18 @@ print('Preciznost predvidjenih vrednosti: ',accuracy_score(test_labels, predicti
 
 plt.figure(figsize = (13, 13))
 
-start_index = 0
+start_idx= 0
 for i in range(25):
     plt.subplot(5, 5, i + 1)
     plt.grid(False)
     plt.xticks([])
     plt.yticks([])
-    prediction = predictions[start_index + i]
-    actual = test_labels[start_index + i]
+    pred_value = predictions[start_idx + i]
+    actual_value = test_labels[start_idx + i]
     col = 'g'
-    if prediction != actual:
+    if pred_value != actual_value:
         col = 'r'
-    plt.xlabel('Stvarna vr.={} || Predvidjena vr={}'.format(actual, prediction), color = col)
-    plt.imshow(X_test[start_index + i])
+    plt.xlabel('Stvarna vr.={} || Pred vr={}'.format(actual_value, pred_value), color = col)
+    plt.imshow(X_test[start_idx + i])
     
 plt.show()
